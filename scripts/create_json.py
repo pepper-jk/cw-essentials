@@ -138,23 +138,21 @@ class converter:
         for row in self.reader:
             episode = copy.deepcopy(self.fields)
             for key, data in row.items():
-                field = {}
                 if key not in self.fields.keys():
                     continue
                 elif key == "chronological":
-                    field = {key: int(data) + self.chrono}
+                    data = int(data) + self.chrono
                 elif key == "tags":
-                    field = {key: self.split_tags(data)}
+                    data = self.split_tags(data)
                 elif key == "characters":
-                    field = {key: self.split_characters(data)}
-                elif key == "recommended":
-                    field = {key: self.split(data)}
-                elif key == "relevance":
-                    field = {key: self.split(data)}
-                else:
-                    field = {key: row[key]}
-                episode.update(field)
-            print(episode)
+                    data = self.split_characters(data)
+                elif key in ["recommended", "relevance"]:
+                    data = self.split(data)
+                elif str(data).isdigit():
+                    data = int(data)
+                elif str(data).replace('.','',1).isdigit():
+                    data = float(data)
+                episode.update({key: data})
             self.episodes.append(episode)
 
 
