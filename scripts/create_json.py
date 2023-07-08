@@ -70,19 +70,16 @@ class converter:
         self.args = parser.parse_args(arguments)
 
         self.letter = self.args.series
-        if self.letter == "C":
-            self.chrono = 2000
-            self.data["name"] = "The Clone Wars"
-        elif self.letter == "T":
-            self.chrono = 2000
-            self.data["name"] = "Tales of the Jedi"
-        elif self.letter == "B":
-            self.chrono = 3000
-            self.data["name"] = "The Bad Batch"
-        elif self.letter == "R":
-            self.chrono = 4000
-            self.data["name"] = "Star Wars Rebels"
 
+        self.series = {
+            "C": {"name": "The Clone Wars", "chrono": 2000},
+            "T": {"name": "Tales of the Jedi", "chrono": 2000},
+            "B": {"name": "The Bad Batch", "chrono": 3000},
+            "R": {"name": "Star Wars Rebels", "chrono": 4000}
+        }
+
+        self.chrono = self.series[self.letter]["chrono"]
+        self.data["name"] = self.series[self.letter]["name"]
 
     def open_files(self):
         jsonfilename = self.args.filename.replace("csv","json")
