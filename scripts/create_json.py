@@ -16,17 +16,18 @@ class converter:
 
         self.metadata = {}
         self.data = {
-            "name": "The Clone Wars",
-            "episodes": []
+            "titles": []
         }
-        self.episodes = []
+        self.titles = []
+        self.series = "The Clone Wars"
 
         self.fields = {
             "id": "",
             "importance": "",
             "chronological": 0,
+            "series": "",
             "number": "",
-            "name": "",
+            "title": "",
             "arc": "",
             "phase": 0,
             "tags": {
@@ -73,15 +74,15 @@ class converter:
 
         self.letter = self.args.series
 
-        self.series = {
-            "C": {"name": "The Clone Wars", "chrono": 2000},
-            "T": {"name": "Tales of the Jedi", "chrono": 2000},
-            "B": {"name": "The Bad Batch", "chrono": 3000},
-            "R": {"name": "Star Wars Rebels", "chrono": 4000}
+        series = {
+            "C": {"series": "The Clone Wars", "chrono": 2000},
+            "T": {"series": "Tales of the Jedi", "chrono": 2000},
+            "B": {"series": "The Bad Batch", "chrono": 3000},
+            "R": {"series": "Star Wars Rebels", "chrono": 4000}
         }
 
-        self.chrono = self.series[self.letter]["chrono"]
-        self.data["name"] = self.series[self.letter]["name"]
+        self.chrono = series[self.letter]["chrono"]
+        self.series = series[self.letter]["series"]
 
     def open_files(self):
         """Opens both the input csv and output json file."""
@@ -163,12 +164,13 @@ class converter:
                 elif str(data).replace('.','',1).isdigit():
                     data = float(data)
                 episode.update({key: data})
-            self.episodes.append(episode)
+            episode.update({"series": self.series})
+            self.titles.append(episode)
 
 
     def dump_json(self):
         """Dumps collected data into a JSON file."""
-        self.data["episodes"] = self.episodes
+        self.data["titles"] = self.titles
         json.dump(self.data, self.jsonfile, indent=2)
         self.jsonfile.write('\n')
 
