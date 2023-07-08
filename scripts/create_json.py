@@ -11,15 +11,18 @@ class converter:
     """A converter for star wars animated series metadata from csv to json."""
     def __init__(self):
         self.args = None
-        self.letter = "C"
-        self.chrono = 0
 
         self.metadata = {}
         self.data = {
             "titles": []
         }
         self.titles = []
-        self.series = "The Clone Wars"
+        self.series = {
+            "C": {"series": "The Clone Wars", "chrono": 2000},
+            "T": {"series": "Tales of the Jedi", "chrono": 2000},
+            "B": {"series": "The Bad Batch", "chrono": 3000},
+            "R": {"series": "Star Wars Rebels", "chrono": 4000}
+        }
 
         self.fields = {
             "id": "",
@@ -69,21 +72,8 @@ class converter:
         """Collects all parameters passed to the script."""
         parser = argparse.ArgumentParser()
         parser.add_argument('filename', type=str)
-        parser.add_argument('-s', '--series', type=str, default="C", choices=["C","T","B","R"])
 
         self.args = parser.parse_args(arguments)
-
-        self.letter = self.args.series
-
-        series = {
-            "C": {"series": "The Clone Wars", "chrono": 2000},
-            "T": {"series": "Tales of the Jedi", "chrono": 2000},
-            "B": {"series": "The Bad Batch", "chrono": 3000},
-            "R": {"series": "Star Wars Rebels", "chrono": 4000}
-        }
-
-        self.chrono = series[self.letter]["chrono"]
-        self.series = series[self.letter]["series"]
 
     def open_files(self):
         """Opens both the input csv and output json file."""
@@ -149,11 +139,13 @@ class converter:
         """Iterates over csv data, annotates it, and sorts it into the json data structure."""
         for row in self.reader:
             episode = copy.deepcopy(self.fields)
+            letter = row["id"][0]
+            episode.update({"series": self.series[letter]["series"]})
             for key, data in row.items():
                 if key not in self.fields.keys():
                     continue
                 elif key == "chronological":
-                    data = int(data) + self.chrono
+                    data = int(data) + self.series[letter]["chrono"]
                 elif key == "tags":
                     data = self.split_tags(data)
                 elif key == "characters":
@@ -165,7 +157,6 @@ class converter:
                 elif str(data).replace('.','',1).isdigit():
                     data = float(data)
                 episode.update({key: data})
-            episode.update({"series": self.series})
             self.titles.append(episode)
 
 
