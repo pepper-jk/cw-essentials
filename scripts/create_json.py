@@ -26,6 +26,7 @@ class converter:
             "importance": "",
             "chronological": 0,
             "series": "",
+            "release": "",
             "number": "",
             "title": "",
             "arc": "",
