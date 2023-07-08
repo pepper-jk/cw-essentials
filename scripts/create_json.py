@@ -9,6 +9,7 @@ from itertools import chain
 
 class converter:
     """A converter for star wars animated series metadata from csv to json."""
+
     def __init__(self):
         self.args = None
 
@@ -74,6 +75,7 @@ class converter:
         parser.add_argument('filename', type=str)
 
         self.args = parser.parse_args(arguments)
+
 
     def open_files(self):
         """Opens both the input csv and output json file."""
