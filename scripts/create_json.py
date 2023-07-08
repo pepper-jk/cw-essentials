@@ -8,6 +8,7 @@ from itertools import chain
 
 
 class converter:
+    """A converter for star wars animated series metadata from csv to json."""
     def __init__(self):
         self.args = None
         self.letter = "C"
@@ -63,6 +64,7 @@ class converter:
 
 
     def get_args(self, arguments):
+        """Collects all parameters passed to the script."""
         parser = argparse.ArgumentParser()
         parser.add_argument('filename', type=str)
         parser.add_argument('-s', '--series', type=str, default="C", choices=["C","T","B","R"])
@@ -82,6 +84,7 @@ class converter:
         self.data["name"] = self.series[self.letter]["name"]
 
     def open_files(self):
+        """Opens both the input csv and output json file."""
         jsonfilename = self.args.filename.replace("csv","json")
 
         csvfile = open(self.args.filename, 'r')
@@ -91,6 +94,7 @@ class converter:
 
 
     def split_csl(self, data):
+        """Splits comma separated list, strips whitespaces, and returns a list."""
         if data == "":
             return []
         data = data.split(',')
@@ -100,6 +104,7 @@ class converter:
 
 
     def split_characters(self, characters):
+        """Separates a list of characters and sorts them into categories of relevancy."""
         chars = {
             "main": [],
             "side": [],
@@ -127,6 +132,7 @@ class converter:
 
 
     def split_tags(self, data):
+        """Separates tags into primary and secondary based on their order."""
         if ',' in data:
             data = self.split_csl(data)
             primary = data[0]
@@ -138,6 +144,7 @@ class converter:
 
 
     def annotate(self):
+        """Iterates over csv data, annotates it, and sorts it into the json data structure."""
         for row in self.reader:
             episode = copy.deepcopy(self.fields)
             for key, data in row.items():
@@ -160,6 +167,7 @@ class converter:
 
 
     def dump_json(self):
+        """Dumps collected data into a JSON file."""
         self.data["episodes"] = self.episodes
         json.dump(self.data, self.jsonfile, indent=2)
         self.jsonfile.write('\n')
