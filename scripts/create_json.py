@@ -112,9 +112,15 @@ class converter:
         char_list = self.split(characters)
         char_list = list(chain.from_iterable(self.macros[item] if item in self.macros.keys() else [item] for item in char_list))
 
+        got_main_char = False
         for i, char in enumerate(char_list):
-            if char in self.main_chars or i == 0:
+            if char in self.main_chars:
                 chars["main"].append(char)
+                got_main_char = True
+            elif not got_main_char:
+                chars["main"].append(char)
+                if i == 1:
+                    got_main_char = True
             elif char in self.side_chars:
                 chars["side"].append(char)
             else:
