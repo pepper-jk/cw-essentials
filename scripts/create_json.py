@@ -90,7 +90,7 @@ class converter:
         self.reader = csv.DictReader(csvfile, delimiter=';')
 
 
-    def split(self, data):
+    def split_csl(self, data):
         if data == "":
             return []
         data = data.split(',')
@@ -106,7 +106,7 @@ class converter:
             "extra": []
         }
 
-        char_list = self.split(characters)
+        char_list = self.split_csl(characters)
         char_list = list(chain.from_iterable(self.macros[item] if item in self.macros.keys() else [item] for item in char_list))
 
         got_main_char = False
@@ -128,7 +128,7 @@ class converter:
 
     def split_tags(self, data):
         if ',' in data:
-            data = self.split(data)
+            data = self.split_csl(data)
             primary = data[0]
             secondary = data[1:]
         else:
@@ -150,7 +150,7 @@ class converter:
                 elif key == "characters":
                     data = self.split_characters(data)
                 elif key in ["recommended", "relevance"]:
-                    data = self.split(data)
+                    data = self.split_csl(data)
                 elif str(data).isdigit():
                     data = int(data)
                 elif str(data).replace('.','',1).isdigit():
