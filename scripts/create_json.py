@@ -2,6 +2,7 @@ import argparse
 import copy
 import csv
 import json
+import os
 import sys
 
 from itertools import chain
@@ -17,7 +18,6 @@ class converter:
         self.data = {
             "titles": []
         }
-        self.titles = []
         self.series = {
             "C": {"series": "The Clone Wars", "chrono": 2000},
             "T": {"series": "Tales of the Jedi", "chrono": 2000},
@@ -72,19 +72,21 @@ class converter:
     def get_args(self, arguments):
         """Collects all parameters passed to the script."""
         parser = argparse.ArgumentParser()
-        parser.add_argument('filename', type=str)
+        parser.add_argument('data_dir', type=str)
 
         self.args = parser.parse_args(arguments)
 
 
     def open_files(self):
         """Opens both the input csv and output json file."""
-        jsonfilename = self.args.filename.replace("csv","json")
+        json_path = self.args.data_dir+"/data.json"
 
-        csvfile = open(self.args.filename, 'r')
-        self.jsonfile = open(jsonfilename, 'w')
-
-        self.reader = csv.DictReader(csvfile, delimiter=';')
+        self.csv_files = []
+        filenames = os.listdir(self.args.data_dir)
+        for filename in (f for f in filenames if ".csv" in f):
+            csv_path = self.args.data_dir + "/" + filename
+            self.csv_files.append(open(csv_path, 'r'))
+        self.json_file = open(json_path, 'w')
 
 
     def split_csl(self, data):
@@ -139,34 +141,37 @@ class converter:
 
     def annotate(self):
         """Iterates over csv data, annotates it, and sorts it into the json data structure."""
-        for row in self.reader:
-            episode = copy.deepcopy(self.fields)
-            letter = row["id"][0]
-            episode.update({"series": self.series[letter]["series"]})
-            for key, data in row.items():
-                if key not in self.fields.keys():
-                    continue
-                elif key == "chronological":
-                    data = int(data) + self.series[letter]["chrono"]
-                elif key == "tags":
-                    data = self.split_tags(data)
-                elif key == "characters":
-                    data = self.split_characters(data)
-                elif key in ["recommended", "relevance"]:
-                    data = self.split_csl(data)
-                elif str(data).isdigit():
-                    data = int(data)
-                elif str(data).replace('.','',1).isdigit():
-                    data = float(data)
-                episode.update({key: data})
-            self.titles.append(episode)
+        titles = []
+        for csv_file in self.csv_files:
+            reader = csv.DictReader(csv_file, delimiter=';')
+            for row in reader:
+                episode = copy.deepcopy(self.fields)
+                letter = row["id"][0]
+                episode.update({"series": self.series[letter]["series"]})
+                for key, data in row.items():
+                    if key not in self.fields.keys():
+                        continue
+                    elif key == "chronological":
+                        data = int(data) + self.series[letter]["chrono"]
+                    elif key == "tags":
+                        data = self.split_tags(data)
+                    elif key == "characters":
+                        data = self.split_characters(data)
+                    elif key in ["recommended", "relevance"]:
+                        data = self.split_csl(data)
+                    elif str(data).isdigit():
+                        data = int(data)
+                    elif str(data).replace('.','',1).isdigit():
+                        data = float(data)
+                    episode.update({key: data})
+                titles.append(episode)
+        self.data["titles"] = titles
 
 
     def dump_json(self):
         """Dumps collected data into a JSON file."""
-        self.data["titles"] = self.titles
-        json.dump(self.data, self.jsonfile, indent=2)
-        self.jsonfile.write('\n')
+        json.dump(self.data, self.json_file, indent=2)
+        self.json_file.write('\n')
 
 
 def main(arguments):
